@@ -38,6 +38,16 @@ module orgexp(
 	wire clk_100mhz_inv;
 	wire [31:0] ram_data_out;
 
+	//U33 VRAM_B
+	wire [14:0] vram_cpu_addr;
+	wire [14:0] vram_vga_addr;
+	wire [7:0] vram_cpu_data_in;
+	wire data_vram_we;
+	wire [7:0] vram_cpu_data_out;
+	wire [7:0] vram_vga_data_out;
+
+
+
 	// U10 Counter_X
 	wire counter0_OUT;
 	wire counter1_OUT;
@@ -51,6 +61,7 @@ module orgexp(
 	// U4 MIO_BUS
 	wire GPIOf0000000_we;
 	wire GPIOe0000000_we;
+	wire GPIOd0000000_we;
 	wire counter_we;
 	wire [31:0] CPU_data4bus;
 	wire [31:0] Peripheral_in;
@@ -62,7 +73,7 @@ module orgexp(
 	wire lg_we;
 	wire [6:0] lg_addr;
 
-	// U0 life_game_dev_io
+	// U0 life_,h_sync,v_syncgame_dev_io
 	wire [9:0] x_position;
 	wire [8:0] y_position;
 	wire inside_video;
@@ -79,6 +90,7 @@ module orgexp(
 
 	// Unknown
 	wire [3:0] blink;
+
 
 	Anti_jitter U9 (
 		.clk(clk_100mhz),
@@ -118,6 +130,18 @@ module orgexp(
 		.clka(clk_100mhz_inv),
 		.douta(ram_data_out[31:0])
 	);
+
+	VRAM_B U33(
+        .addra(vram_cpu_addr[14:0]),
+        .wea(data_vram_we),
+        .dina(vram_cpu_data_in[7:0]),
+        .clka(clk_100mhz_inv),
+
+				.addrb(vram_vga_addr[14:0]),
+				.clkb(clock_25mhz),
+				.doutb(vram_vga_data_out[7:0])
+	);
+
 	Counter_x U10 (
 		.clk(clk_IO),
 		.rst(rst),
@@ -141,7 +165,9 @@ module orgexp(
 		.led_out(led_out[7:0]),
 		.GPIOf0()
 	);
-	assign LED = led_out[7:0];
+
+	assign LED = {led_out[7] | v_sync, led_out[6] | h_sync, led_out[5:0]};
+
 	MIO_BUS U4 (
 		.mem_w(mem_w),
 		.counter0_out(counter0_OUT),
@@ -162,36 +188,29 @@ module orgexp(
 		.ram_data_in(ram_data_in[31:0]),
 		.ram_addr(ram_addr[9:0]),
 		.data_ram_we(data_ram_we),
-		
-		.lg_out(lg_out[31:0]),
-		.lg_we(lg_we),
-		.lg_addr(lg_addr[6:0])
+
+		.vram_waddr(vram_cpu_addr[14:0]),
+		.data_vram_we(data_vram_we),
+		.vram_data_in(vram_cpu_data_in)
+		// .vram_data_out(vram_cpu_data_out)
 	);
-	life_game_dev_io U0 (
-		.clock(clk_100mhz_inv),
-		.cell_write(lg_we),
-		.cell_address(lg_addr[6:0]),
-		.cell_data_in(Peripheral_in[31:0]),
-		.world_clock(clkdiv[26]),
-		.x_position(x_position[9:0]),
-		.y_position(y_position[8:0]),
-		.inside_video(inside_video),
-		.cell_data_out(lg_out[31:0]),
-		.color(color[7:0])
-	);
-	assign red = color[7:5];
-	assign green = color[4:2];
-	assign blue = color[1:0];
+
 	assign clock_25mhz = clkdiv[1];
 	vga_controller U00 (
 		.clock_25mhz(clock_25mhz),
 		.reset(rst),
+		.vram_data_out(vram_vga_data_out[7:0]),
 		.h_sync(h_sync),
 		.v_sync(v_sync),
+		.red(red),
+		.green(green),
+		.blue(blue),
 		.inside_video(inside_video),
 		.x_position(x_position[9:0]),
-		.y_position(y_position[8:0])
+		.y_position(y_position[8:0]),
+		.vram_addr(vram_vga_addr[14:0])
 	);
+
 	seven_seg_Dev_IO U5 (
 		.clk(clk_IO),
 		.rst(rst),
@@ -201,16 +220,17 @@ module orgexp(
 		.blink_in({{24{1'b0}}, blink[3:0], blink[3:0]}),
 		.disp_cpudata(Peripheral_in[31:0]),
 		.Test_data1({2'b00, PC_out[31:2]}),
-		.Test_data2(counter_out[31:0]),
+		.Test_data2(Peripheral_in[31:0]),
 		.Test_data3(inst_out[31:0]),
 		.Test_data4(Addr_out[31:0]),
 		.Test_data5(Data_out[31:0]),
 		.Test_data6(CPU_data4bus[31:0]),
-		.Test_data7(PC_out[31:0]),
+		.Test_data7({9'b0, vram_vga_addr[14:0], vram_vga_data_out[7:0]}),
 		.disp_num(Disp_num[31:0]),
 		.blink_out(blink_out[3:0]),
 		.point_out(point_out[3:0])
 	);
+
 	seven_seg_dev U6 (
 		.flash_clk(clkdiv[26]),
 		.disp_num(Disp_num[31:0]),
@@ -221,4 +241,5 @@ module orgexp(
 		.blinking(blink_out[3:0]),
 		.AN(AN[3:0])
 	);
+
 endmodule

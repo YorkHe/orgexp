@@ -3,12 +3,17 @@
 module vga_controller(
 		input clock_25mhz,
 		input reset,
+		input [7:0] vram_data_out,
+		output [2:0] red,
+		output [2:0] green,
+		output [1:0] blue,
 		output reg h_sync,
 		output reg v_sync,
 		output reg inside_video,
 		output [9:0] x_position,
-		output [8:0] y_position
-	);
+		output [8:0] y_position,
+		output [14:0] vram_addr
+		);
 
 	// SYNC, BPORCH, VIDEO, FPORCH.
 	localparam H_SYNC = 96;
@@ -17,12 +22,19 @@ module vga_controller(
 	localparam H_TOTAL = 800;
 	localparam V_SYNC = 2;
 	localparam V_BPORCH = 35;
-	localparam V_FPORCH = 511;
+	localparam V_FPORCH = 488;
 	localparam V_TOTAL = 525;
 
 	reg [9:0] h_counter = 0;
 	reg [9:0] v_counter = 0;
 	reg v_enable = 0;
+
+	assign red = (inside_video)?vram_data_out[7:5]:3'b000;
+	assign green = (inside_video)?vram_data_out[4:2]:3'b000;
+	assign blue = (inside_video)?vram_data_out[1:0]:2'b00;
+
+	assign vram_addr = (y_position / 4 ) * (160) + (x_position / 4);
+
 
 	always @(posedge clock_25mhz or posedge reset) begin
 		if (reset) begin
@@ -72,7 +84,7 @@ module vga_controller(
 		end
 	end
 
-	assign x_position = h_counter - H_BPORCH;
-	assign y_position = v_counter - V_BPORCH;
+	assign x_position = (h_counter >= H_BPORCH)? h_counter - H_BPORCH : 0;
+	assign y_position = (v_counter >= V_BPORCH)? v_counter - V_BPORCH : 0;
 
 endmodule

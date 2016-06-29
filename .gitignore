@@ -1,7 +1,10 @@
 *
 !.gitignore
-!asm
+!asm/*
+!*.asm
 !ipcore_dir
+!*.bmp
+!*.hex
 !*.md
 !*.ngc
 orgexp.ngc

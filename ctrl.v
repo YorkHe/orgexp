@@ -52,7 +52,10 @@ module ctrl(
 			ALU_SUB = 4'b0110,
 			ALU_SLTU = 4'b0111,
 			ALU_SLLV = 4'b1000,
-			ALU_SLT = 4'b1001;
+			ALU_SLT = 4'b1001,
+			ALU_MUL = 4'b1010,
+			ALU_DIV = 4'b1011,
+			ALU_MOD = 4'b1100;
 
 	`define CPU_ctrl_signals {PCWrite, PCWriteCond, IorD, MemRead, MemWrite, IRWrite, MemtoReg[1:0], PCSource[1:0], ALUSrcB[1:0], ALUSrcA, RegWrite, RegDst[1:0], CPU_MIO}
 

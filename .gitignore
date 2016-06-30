@@ -1,6 +1,6 @@
 *
 !.gitignore
-!asm/*
+!asm
 !*.py
 !*.asm
 !ipcore_dir

@@ -43,15 +43,11 @@ main:
 
   add $t0, $zero, $zero
 
-//  time_count:
-//    addi $t0, $t0, 1
-//    slt $t1, $t0, $s3
-//    bne $t1, $zero, time_count
-
-//  jal clear_buf
+  jal clear_buf
 
   lw $t0, 0($s4)
   add $t1, $zero, $t0
+  srl $t0, $t0, 6
 
 //Read btn
   add $v0, $zero, $zero
@@ -127,35 +123,27 @@ clear_buf:
   addi $t2, $zero, 0xc4
   clear_loop:
     add $t1, $t0, $t0
+    addi $t0, $t0, 1
+
     add $t1, $t1, $t1
     add $t1, $t1, $s6
     sw $t2, 0($t1)
-    addi $t0, $t0, 1
     slt $t3, $t0, $t7
     bne $t3, $zero, clear_loop
   jr $ra
-
-
-
-
-
-
-
-
-
-
 
 
 paint_plate:
 
   add $t0, $zero, $zero
   add $t1, $zero, $zero
+  add $t8, $zero, $a1
 
   beq $a1, $zero, plate_zero
 plate_init:
   addi $t0, $t0, 160
-  addi $a1, $a1, -1
-  bne $a1, $zero, plate_init
+  addi $t8, $t8, -1
+  bne $t8, $zero, plate_init
 
 plate_zero:
   add $t0, $t0, $a0
@@ -184,7 +172,6 @@ plate_notdo:
   addi $t4, $zero, 25
   slt $t5, $t6, $t4
   beq $t5, $zero, plate_next_line
-
   j plate_loop
 
 plate_next_line:
@@ -207,11 +194,13 @@ paint_hero:
   add $t0, $zero, $zero
   add $t1, $zero, $zero
 
+  add $t8, $zero, $a0
+  add $t9, $zero, $a1
   beq $a1, $zero, hero_zero
 hero_init:
   addi $t0, $t0, 160
-  addi $a1, $a1, -1
-  bne $a1, $zero, hero_init
+  addi $t9, $t9, -1
+  bne $t9, $zero, hero_init
 
 hero_zero:
   add $t0, $t0, $a0
@@ -259,85 +248,7 @@ hero_next_line:
 hero_done:
 jr $ra
 
-
-paint_bg:
-// push
-
-  add $t0, $zero, $zero
-  add $t1, $zero, $zero
-  add $t2, $zero, $zero
-  add $t3, $zero, $zero
-  add $t6, $zero, $zero
-  add $t7, $zero, $zero
-  add $a1, $zero, $zero
-bg_loop:
-// load pixel from memory
-  add $t4, $zero, $t2
-  add $t4, $t4, $t4
-  add $t4, $t4, $t4
-  add $t4, $t4, $s1
-  lw $t5, 0x0($t4)
-
-// save pixel to vram
-  add $t4, $t0, $t0
-  add $t4, $t4, $t4
-  add $t4, $t4, $s6
-  sw $t5, 0x0($t4)
-
-  addi $t0, $t0, 0x1
-  addi $t6, $t6, 0x1
-  addi $t4, $zero, 160
-  slt $t5, $t6, $t4
-  beq $t5, $zero, bg_next_line1
-
-bg_next_line1_ret:
-  addi $t2, $t2, 0x1
-  addi $t7, $t7, 0x1
-  addi $t4, $zero, 15
-  slt $t5, $t7, $t4
-  beq $t5, $zero, bg_next_line2
-
-bg_next_line2_ret:
-  j bg_loop
-
-bg_done:
-  jr $ra
-
-
-bg_next_line1:
-  add $t6, $zero, $zero
-  addi $a1, $a1, 15
-  addi $t3, $t3, 1
-
-  add $t2, $zero, $a1
-
-  addi $t1, $t1, 0x1
-  addi $t4, $zero, 120
-  slt $t5, $t1, $t4
-  beq $t5, $zero, bg_done
-
-  addi $t4, $zero, 15
-  slt $t5, $t3, $t4
-  bne $t5, $zero, bg_line_next
-  add $t3, $zero, $zero
-  add $a1, $zero, $zero
-  add $t2, $zero, $zero
-
-bg_line_next:
-  j bg_next_line1_ret
-
-
-bg_next_line2:
-  add $t2, $zero, $a1
-  j bg_next_line2_ret
-
-
-
-
-
-
-
-  // Background 15*15
+// Background 15*15
 .data 0x500
  .word 0xda,0xda,0xda,0xda,0xda,0xda,0xda,0xd6
  .word 0xda,0xda,0xda,0xda,0xda,0xda,0xda,0xda

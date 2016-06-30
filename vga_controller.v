@@ -29,9 +29,9 @@ module vga_controller(
 	reg [9:0] v_counter = 0;
 	reg v_enable = 0;
 
-	assign red = (inside_video)?vram_data_out[7:5]:3'b000;
-	assign green = (inside_video)?vram_data_out[4:2]:3'b000;
-	assign blue = (inside_video)?vram_data_out[1:0]:2'b00;
+	assign red = (inside_video)?(vram_data_out==8'hc0 || vram_data_out == 8'hc4 )?3'b111:vram_data_out[7:5]:3'b000;
+	assign green = (inside_video)?(vram_data_out==8'hc0 || vram_data_out == 8'hc4 )?3'b111:vram_data_out[4:2]:3'b000;
+	assign blue = (inside_video)?(vram_data_out==8'hc0 || vram_data_out == 8'hc4 )?2'b11:vram_data_out[1:0]:2'b00;
 
 	assign vram_addr = (y_position / 4 ) * (160) + (x_position / 4);
 

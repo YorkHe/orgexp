@@ -32,7 +32,5 @@ def img_to_bin(bmp_name):
 
 
 if __name__ == '__main__':
-    img_to_bin("doodle_left")
-    img_to_bin("doodle_right")
-    img_to_bin("background")
-    img_to_bin("plate")
+    img_to_bin("0")
+    img_to_bin("1")

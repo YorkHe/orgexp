@@ -5,8 +5,8 @@ add $s0, $zero, $zero
 lui $s0, 0xd000
 
 // $s4 btn address
-add $s4, $zero, $zero
-lui $s4, 0xf000
+add $s1, $zero, $zero
+lui $s1, 0xf000
 
 // $s5 7-seg address
 add $s5, $zero, $zero
@@ -19,8 +19,8 @@ addi $s6, $zero, 19200
 
 addi $s7, $zero, 0x500
 
-add $a0, $zero, $zero
-addi $a1, $zero, 20
+addi $a0, $zero, 40
+addi $a1, $zero, 60
 
 sw $a0, 0($s7)
 sw $a1, 4($s7)
@@ -45,9 +45,16 @@ sw $t0, 36($s7)
 
 main:
 
+  add $t0, $zero, $zero
+  addi $t1, $zero, 0x5000
+
+  counter_timer:
+  addi $t0, $t0, 1
+  bne $t0, $t1, counter_timer
+
   lw $a0, 0($s7)
   lw $a1, 4($s7)
-  addi $a2, $zero, 0x1
+  addi $a2, $zero, 0x2
   jal move_plate
   sw $a0, 0($s7)
   sw $a1, 4($s7)
@@ -55,7 +62,7 @@ main:
 
   lw $a0, 8($s7)
   lw $a1, 12($s7)
-  addi $a2, $zero, 0x2
+  addi $a2, $zero, 0x1
   jal move_plate
   sw $a0, 8($s7)
   sw $a1, 12($s7)
@@ -70,7 +77,6 @@ main:
   sw $a1, 20($s7)
   sw $a2, 24($s7)
   sw $a3, 28($s7)
-
 
   lw $a0, 0($s7)
   lw $a1, 4($s7)
@@ -97,7 +103,13 @@ main:
 move_plate:
   add $t0, $zero, $zero
   add $t1, $zero, $zero
-  lw $t0, 0($s4)
+
+  lw $t0, 0($s1)
+
+  add $t5, $t0, $t0
+  add $t5, $t5, $t5
+  sw $t5, 0($s1)
+
   and $t1, $t0, $a2
   addi $t2, $zero, 1
   beq $t1, $zero, plate_up
@@ -105,12 +117,11 @@ move_plate:
 
   plate_up:
     beq $a0, $zero, plate_top
-    addi $t3, $zero, 0x120
+    addi $t3, $zero, 120
     beq $a1, $t3, plate_bot
     plate_move:
       add $a0, $a0, $t2
       add $a1, $a1, $t2
-
 
   plate_done:
 
@@ -130,7 +141,7 @@ move_plate:
 move_ball:
 
   addi $t0, $zero, 156
-  addi $t1, $zero, 116
+  addi $t1, $zero, 112
 
   add $a0, $a0, $a2
   add $a1, $a1, $a3
@@ -142,9 +153,14 @@ move_ball:
   beq $a1, $zero, ball_v_bounce
   beq $a1, $t1, ball_v_bounce
 
-  addi $t2, $zero, 10
+  addi $t2, $zero, 14
+  lw $t8, 0($s7)
+  lw $t9, 4($s7)
   beq $a0, $t2, ball_h_bounce
+
   addi $t2, $zero, 146
+  lw $t8, 8($s7)
+  lw $t9, 12($s7)
   beq $a0, $t2, ball_h_bounce
 
 move_done:
@@ -172,6 +188,12 @@ ball_v_bounce:
   j move_done
 
 ball_h_bounce:
+
+  slt $t5, $t8, $a1
+  beq $t5, $zero, move_done
+  slt $t5, $a1, $t9
+  beq $t5, $zero, move_done
+
   xori $a2, $a2, -1
   addi $a2, $a2, 1
   j move_done
@@ -234,12 +256,12 @@ draw_plate:
 
   plate_loop:
 
-    addi $t4, $zero, 0xff
+    add $t4, $zero, $zero
     slt $t5, $t1, $a0
     bne $t5, $zero, plate_black
     slt $t5, $a1, $t1
-    beq $t5, $zero, plate_black
-    add $t4, $zero, $zero
+    bne $t5, $zero, plate_black
+    addi $t4, $zero, 0xff
 
     plate_black:
 

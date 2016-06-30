@@ -24,21 +24,127 @@ lui $s4, 0xf000
 add $s5, $zero, $zero
 lui $s5, 0xe000
 
-// $s6 160 * 120
-addi $s6, $zero, 19200
+// $s6 video buffer address
+add $s6, $zero, $zero
+lui $s6, 0xc000
+
+// $s7 tmp_var
+addi $s7, $zero, 0x1800
+
+add $a0, $zero, $zero
+add $a1, $zero, $zero
+
+sw $a0, 0($s7)
+sw $a1, 4($s7)
+sw $a1, 8($s7)
+sw $a1, 12($s7)
 
 main:
 
+  add $t0, $zero, $zero
 
+//  time_count:
+//    addi $t0, $t0, 1
+//    slt $t1, $t0, $s3
+//    bne $t1, $zero, time_count
 
+//  jal clear_buf
+
+  lw $t0, 0($s4)
+  add $t1, $zero, $t0
+
+//Read btn
+  add $v0, $zero, $zero
+  sw $t0, 0($s4)
+  andi $t2, $t1, 0x100
+  bne $t2, $zero, btn_right
+  andi $t2, $t1, 0x200
+  bne $t2, $zero, btn_left
+  j btn_next
+
+  btn_right:
+    addi $v0, $zero, 1
+    j btn_next
+
+  btn_left:
+    addi $v0, $zero, -1
+    j btn_next
+
+  btn_next:
+    lw $a0, 0($s7)
+    lw $a1, 4($s7)
+    add $a0, $a0, $v0
+
+  addi $t0, $zero, 120
+  bne $a0, $t0, reset_cor
   add $a0, $zero, $zero
   add $a1, $zero, $zero
+
+reset_cor:
   jal paint_hero
 
+  sw $a0, 0($s7)
+  sw $a1, 4($s7)
+
+  lw $a0, 8($s7)
+  lw $a1, 12($s7)
   addi $a0, $zero, 0x50
   addi $a1, $zero, 0x50
   jal paint_plate
+
+  sw $a0, 8($s7)
+  sw $a1, 12($s7)
+
+  jal buf_to_vga
+
   j main
+
+
+
+buf_to_vga:
+  addi $t7, $zero, 19200
+  add $t0, $zero, $zero
+
+  buf_loop:
+    add $t1, $t0, $t0
+    add $t1, $t1, $t1
+    add $t1, $t1, $s6
+    lw $t2, 0($t1)
+    add $t1, $t0, $t0
+    add $t1, $t1, $t1
+    add $t1, $t1, $s0
+    sw $t2, 0($t1)
+    addi $t0, $t0, 1
+    slt $t3, $t0, $t7
+    bne $t3, $zero, buf_loop
+  jr $ra
+
+
+clear_buf:
+  addi $t7, $zero, 19200
+  add $t0, $zero, $zero
+  add $t1, $zero, $zero
+  addi $t2, $zero, 0xc4
+  clear_loop:
+    add $t1, $t0, $t0
+    add $t1, $t1, $t1
+    add $t1, $t1, $s6
+    sw $t2, 0($t1)
+    addi $t0, $t0, 1
+    slt $t3, $t0, $t7
+    bne $t3, $zero, clear_loop
+  jr $ra
+
+
+
+
+
+
+
+
+
+
+
 
 paint_plate:
 
@@ -68,7 +174,7 @@ plate_loop:
 
   add $t4, $t0, $t0
   add $t4, $t4, $t4
-  add $t4, $t4, $s0
+  add $t4, $t4, $s6
   sw $t5, 0x0($t4)
 
 plate_notdo:
@@ -124,7 +230,7 @@ hero_loop:
 
   add $t4, $t0, $t0
   add $t4, $t4, $t4
-  add $t4, $t4, $s0
+  add $t4, $t4, $s6
   sw $t5, 0x0($t4)
 
 hero_notdo:
@@ -175,7 +281,7 @@ bg_loop:
 // save pixel to vram
   add $t4, $t0, $t0
   add $t4, $t4, $t4
-  add $t4, $t4, $s0
+  add $t4, $t4, $s6
   sw $t5, 0x0($t4)
 
   addi $t0, $t0, 0x1
@@ -232,7 +338,7 @@ bg_next_line2:
 
 
   // Background 15*15
-.data 0x300
+.data 0x500
  .word 0xda,0xda,0xda,0xda,0xda,0xda,0xda,0xd6
  .word 0xda,0xda,0xda,0xda,0xda,0xda,0xda,0xda
  .word 0xda,0xda,0xda,0xda,0xda,0xda,0xda,0xda
@@ -266,7 +372,7 @@ bg_next_line2:
 
 
   // Hero 20*20
-.data 0x700
+.data 0x900
  .word 0xc4,0xc4,0xc4,0xc4,0xc4,0xc4,0xc4,0xc4
  .word 0xc4,0xc4,0xc4,0x88,0x0,0x0,0x64,0xc4
  .word 0xc4,0xc4,0xc4,0xc4,0xc0,0xc0,0xc0,0xc0
@@ -320,7 +426,7 @@ bg_next_line2:
 
 
   // Plate 25 * 7
-.data 0x1200
+.data 0x1300
  .word 0xc0,0xc0,0xc0,0xc0,0xc0,0xc0,0xc0,0xc0
  .word 0xc0,0xc0,0xc0,0xc0,0xc0,0xc0,0xc0,0xc0
  .word 0xc0,0xc0,0xc0,0xc0,0xc0,0xc0,0xc0,0xc0

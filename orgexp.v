@@ -38,6 +38,12 @@ module orgexp(
 	wire clk_100mhz_inv;
 	wire [31:0] ram_data_out;
 
+	//U34 VIDEO_BUF
+	wire [14:0]buf_addr;
+	wire [7:0] buf_data_in;
+	wire [7:0] buf_data_out;
+	wire data_buf_we;
+
 	//U33 VRAM_B
 	wire [14:0] vram_cpu_addr;
 	wire [14:0] vram_vga_addr;
@@ -66,7 +72,7 @@ module orgexp(
 	wire [31:0] CPU_data4bus;
 	wire [31:0] Peripheral_in;
 	wire [31:0] ram_data_in;
-	wire [9:0] ram_addr;
+	wire [10:0] ram_addr;
 	wire data_ram_we;
 
 	wire [31:0] lg_out;
@@ -124,12 +130,20 @@ module orgexp(
 	);
 	assign clk_100mhz_inv = ~clk_100mhz;
 	RAM_B U3 (
-		.addra(ram_addr[9:0]),
+		.addra(ram_addr[10:0]),
 		.wea(data_ram_we),
 		.dina(ram_data_in[31:0]),
 		.clka(clk_100mhz_inv),
 		.douta(ram_data_out[31:0])
 	);
+
+	VIDEO_BUF U34(
+		.addra(buf_addr[14:0]),
+		.wea(data_buf_we),
+		.dina(buf_data_in[7:0]),
+		.clka(clk_100mhz_inv),
+		.douta(buf_data_out[7:0])
+		);
 
 	VRAM_B U33(
         .addra(vram_cpu_addr[14:0]),
@@ -156,6 +170,7 @@ module orgexp(
 		.counter2_OUT(counter2_OUT),
 		.counter_out(counter_out[31:0])
 	);
+
 	led_Dev_IO U7 (
 		.clk(clk_IO),
 		.rst(rst),
@@ -166,7 +181,7 @@ module orgexp(
 		.GPIOf0()
 	);
 
-	assign LED = {led_out[7] | v_sync, led_out[6] | h_sync, led_out[5:0]};
+	assign LED = {led_out[7] | counter0_OUT, led_out[6] | counter1_OUT, led_out[7] | counter2_OUT , led_out[5:0]};
 
 	MIO_BUS U4 (
 		.mem_w(mem_w),
@@ -186,13 +201,17 @@ module orgexp(
 		.Cpu_data4bus(CPU_data4bus[31:0]),
 		.Peripheral_in(Peripheral_in[31:0]),
 		.ram_data_in(ram_data_in[31:0]),
-		.ram_addr(ram_addr[9:0]),
+		.ram_addr(ram_addr[10:0]),
 		.data_ram_we(data_ram_we),
 
 		.vram_waddr(vram_cpu_addr[14:0]),
 		.data_vram_we(data_vram_we),
-		.vram_data_in(vram_cpu_data_in)
-		// .vram_data_out(vram_cpu_data_out)
+		.vram_data_in(vram_cpu_data_in),
+
+		.data_buf_we(data_buf_we),
+		.buf_addr(buf_addr),
+		.buf_data_in(buf_data_in),
+		.buf_data_out(buf_data_out)
 	);
 
 	assign clock_25mhz = clkdiv[1];
@@ -225,7 +244,7 @@ module orgexp(
 		.Test_data4(Addr_out[31:0]),
 		.Test_data5(Data_out[31:0]),
 		.Test_data6(CPU_data4bus[31:0]),
-		.Test_data7({9'b0, vram_vga_addr[14:0], vram_vga_data_out[7:0]}),
+		.Test_data7({buf_data_out[7:0],1'b0, vram_vga_addr[14:0], vram_vga_data_out[7:0]}),
 		.disp_num(Disp_num[31:0]),
 		.blink_out(blink_out[3:0]),
 		.point_out(point_out[3:0])

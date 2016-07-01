@@ -14,7 +14,7 @@ module MIO_BUS(
 		input counter2_out,	//  2
 		output reg [31:0] Cpu_data4bus,	// CPU , CPU
 		output reg [31:0] ram_data_in,	// RAM  RAM
-		output reg [9:0] ram_addr,	// RAM  RAM
+		output reg [10:0] ram_addr,	// RAM  RAM
 		output reg data_ram_we,	// RAM  RAM
 		output reg GPIOf0000000_we,	//  LED
 		output reg GPIOe0000000_we,	//  7 U5
@@ -54,7 +54,7 @@ module MIO_BUS(
 		case (addr_bus[31:28])
 			4'h0: begin
 				data_ram_we = mem_w;
-				ram_addr = addr_bus[11:2];
+				ram_addr = addr_bus[12:2];
 				ram_data_in = Cpu_data2bus;
 				Cpu_data4bus = ram_data_out;
 				data_ram_rd = ~mem_w;

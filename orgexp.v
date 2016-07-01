@@ -66,7 +66,7 @@ module orgexp(
 	wire [31:0] CPU_data4bus;
 	wire [31:0] Peripheral_in;
 	wire [31:0] ram_data_in;
-	wire [9:0] ram_addr;
+	wire [10:0] ram_addr;
 	wire data_ram_we;
 
 	wire [31:0] lg_out;
@@ -124,7 +124,7 @@ module orgexp(
 	);
 	assign clk_100mhz_inv = ~clk_100mhz;
 	RAM_B U3 (
-		.addra(ram_addr[9:0]),
+		.addra(ram_addr[10:0]),
 		.wea(data_ram_we),
 		.dina(ram_data_in[31:0]),
 		.clka(clk_100mhz_inv),

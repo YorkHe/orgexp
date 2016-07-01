@@ -107,15 +107,15 @@ main:
   addi $a2, $zero, 0
   jal draw_plate
 
-//  lw $a0, 32($s7)
-//  addi $a1, $zero, 60
-//  jal draw_score
-//  sw $a0, 32($s7)
+  lw $a0, 32($s7)
+  addi $a1, $zero, 60
+  jal draw_score
+  sw $a0, 32($s7)
 
-//  lw $a0, 36($s7)
-//  addi $a1, $zero, 120
-//  jal draw_score
-//  sw $a0, 36($s7)
+  lw $a0, 36($s7)
+  addi $a1, $zero, 120
+  jal draw_score
+  sw $a0, 36($s7)
 
 
   j main
@@ -145,7 +145,7 @@ draw_score:
   beq $a0, $t1, score_six
 
   score_done:
-    add $t1, $zero, $zero
+    add $t6, $zero, $zero
 
   score_loop:
     add $t1, $t0, $t0
@@ -314,7 +314,11 @@ ball_out0:
   addi $a0, $zero, 80
   addi $a1, $zero, 60
   lw $t0, 32($s7)
+  addi $t1, $zero, 7
   addi $t0, $t0, 1
+  beq $t0, $t1, not_over
+  add $t0, $zero, $zero
+  not_over:
   sw $t0, 32($s7)
   j move_done
 
@@ -322,7 +326,11 @@ ball_out1:
   addi $a0, $zero, 80
   addi $a1, $zero, 60
   lw $t0, 36($s7)
+  addi $t1, $zero, 7
   addi $t0, $t0, 1
+  beq $t0, $t1, not_over2
+  add $t0, $zero, $zero
+  not_over2:
   sw $t0, 36($s7)
   j move_done
 

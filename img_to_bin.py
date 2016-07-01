@@ -15,9 +15,9 @@ def img_to_bin(bmp_name):
             g = int((g / 255.0 * 7))
             b = int((b / 255.0 * 3))
             color = r * 2**5 + g * 2 ** 2 + b
-            arr_a.append(hex(color));
-
-    arr = [arr_a[i:i+8] for i in range(0, len(arr_a),8)]
+            arr_a.append(color);
+    arr_b = ["0x"+"%x"% (arr_a[i] * 2**24 + arr_a[i+1] * 2 **16 + arr_a[i+2] * 2 **8 + arr_a[i+3]) for i in range(0, len(arr_a), 4)]
+    arr = [arr_b[i:i+8] for i in range(0, len(arr_b),8)]
 
     for sub_arr in arr:
         res = res + "\n .word "
@@ -34,3 +34,11 @@ def img_to_bin(bmp_name):
 if __name__ == '__main__':
     img_to_bin("0")
     img_to_bin("1")
+    img_to_bin("2")
+    img_to_bin("3")
+    img_to_bin("4")
+    img_to_bin("5")
+    img_to_bin("6")
+    img_to_bin("7")
+    img_to_bin("8")
+    img_to_bin("9")

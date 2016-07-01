@@ -41,6 +41,7 @@ module MIO_BUS(
 		counter_we=0;
 		counter_rd=0;
 		data_vram_we=0;
+		data_vram_rd=0;
 		GPIOf0000000_we=0;
 		GPIOe0000000_we=0;
 		GPIOf0000000_rd=0;

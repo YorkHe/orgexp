@@ -78,6 +78,8 @@ main:
   sw $a2, 24($s7)
   sw $a3, 28($s7)
 
+  jal draw_line
+
   lw $a0, 0($s7)
   lw $a1, 4($s7)
   addi $a2, $zero, 10
@@ -98,13 +100,52 @@ main:
   sw $a0, 16($s7)
   sw $a1, 20($s7)
 
+
+  addi $a0, $zero, 0
+  addi $a1, $zero, 0
+  addi $a2, $zero, 0
+  jal draw_plate
+
   j main
+
+draw_line:
+
+  add $t0, $zero, $a2
+  add $t1, $zero, $zero
+  add $t2, $zero, $zero
+  add $t3, $zero, $zero
+
+  line_loop:
+
+      add $t2, $t0, $t0
+      add $t2, $t2, $t2
+      add $t2, $t2, $s0
+      sw $t4, 0($t2)
+      sw $t4, 640($t2)
+
+      addi $t1, $t1, 2
+      addi $t0, $t0, 320
+
+      addi $t3, $zero, 120
+
+      slt $t5, $t1, $t3
+      bne $t5, $zero, line_loop
+
+  jr $ra
 
 move_plate:
   add $t0, $zero, $zero
   add $t1, $zero, $zero
+  add $t2, $zero, $zero
+  lui $t2, 0xf000
 
-  lw $t0, 0($s1)
+
+  sw $t0, 0($t2)
+  addi $t3, $zero, -1
+
+  plate_looop:
+  lw $t0, 0($t2)
+  beq $t0, $t3, plate_looop
 
   add $t5, $t0, $t0
   add $t5, $t5, $t5
